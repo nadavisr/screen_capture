@@ -1,0 +1,9 @@
+# No third-party packages required.
+# All dependencies are Python stdlib (tkinter, subprocess, os, threading, signal, sys).
+#
+# Runtime requirement (install separately):
+#   GStreamer 1.20+ for Windows — https://gstreamer.freedesktop.org/download/
+#   Required GStreamer plugins:
+#     gst-plugins-base   (videoconvert, filesink)
+#     gst-plugins-bad    (d3d11screencapturesrc)
+#     gst-plugins-ugly   (x264enc)

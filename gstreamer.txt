@@ -1,0 +1,19 @@
+gst-launch-1.0 -e ^
+    d3d11screencapturesrc ! videoconvert ! mfh265enc !  queue ! h265parse ! mux. ^
+    wasapisrc loopback=true ! audioconvert ! audioresample ! opusenc ! queue ! mux. ^
+    matroskamux name=mux ! filesink location=capture.mkv
+
+
+gst-launch-1.0 -e ^
+    d3d11screencapturesrc ! videoconvert ! mfh265enc !  queue ! h265parse ! mux. ^
+    wasapisrc loopback=true ! audioconvert ! audioresample ! opusenc ! queue ! mux. ^
+    matroskamux name=mux ! filesink location=capture.mkv
+
+
+gst-launch-1.0 filesrc location=capture.mkv ! matroskademux ! matroskaparse ! matroskamux ! filesink location=capture_fixed.mkv
+
+gst-launch-1.0 filesrc location=capture.mkv ! parsebin  !  queue ! matroskamux  ! filesink location=fixed_file.mkv
+
+gst-launch-1.0 -e  mpegtsmux name=mux  d3d11screencapturesrc ! videoconvert ! mfh265enc ! queue ! h265parse ! mux. ^
+ wasapisrc loopback=true ! audioconvert ! audioresample ! voaacenc ! queue ! mux. ^
+ mux. ! filesink location=capture.ts

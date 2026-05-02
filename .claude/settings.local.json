@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(c:/Tools/ScreenCapture/venv/Scripts/pip install *)"
+    ]
+  }
+}
