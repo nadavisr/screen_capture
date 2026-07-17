@@ -1,3 +1,6 @@
+# Create self contained exe file:
+# pyinstaller --noconfirm --onefile --windowed --add-data "C:/gstreamer/1.0/msvc_x86_64;gstreamer" screen_capture.py
+
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import logging
@@ -6,10 +9,12 @@ import shlex
 import shutil
 import subprocess
 import threading
+import sys
 
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
+# Modified for standalone portability
 _GST_SEARCH_PATHS = [
     r"C:\gstreamer\1.0\msvc_x86_64\bin\gst-launch-1.0.exe",
     r"C:\gstreamer\1.0\x86_64\bin\gst-launch-1.0.exe",
@@ -17,8 +22,22 @@ _GST_SEARCH_PATHS = [
     r"C:\Program Files\GStreamer\1.0\x86_64\bin\gst-launch-1.0.exe",
 ]
 
-
 def _find_gst_launch() -> str | None:
+    # 1. Check if running inside a PyInstaller standalone bundle
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # We will bundle the GStreamer binaries into a folder named "gstreamer" inside the exe
+        internal_path = os.path.join(sys._MEIPASS, "gstreamer", "bin", "gst-launch-1.0.exe")
+        if os.path.isfile(internal_path):
+            log.debug("gst-launch-1.0 found inside standalone bundle: %s", internal_path)
+            
+            # CRITICAL: GStreamer requires its 'bin' directory to be on the PATH to find its DLLs
+            gst_bin_dir = os.path.dirname(internal_path)
+            if gst_bin_dir not in os.environ["PATH"]:
+                os.environ["PATH"] = gst_bin_dir + os.path.pathsep + os.environ["PATH"]
+                
+            return internal_path
+
+    # 2. Fallback to system-wide installations if not bundled
     exe = shutil.which("gst-launch-1.0") or shutil.which("gst-launch-1.0.exe")
     if exe:
         log.debug("gst-launch-1.0 found on PATH: %s", exe)
