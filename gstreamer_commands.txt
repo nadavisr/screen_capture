@@ -3,11 +3,18 @@ gst-launch-1.0 -e ^
     wasapisrc loopback=true ! audioconvert ! audioresample ! opusenc ! queue ! mux. ^
     matroskamux name=mux ! filesink location=capture.mkv
 
+//fix timestamps after recording
 gst-launch-1.0 -e filesrc location=temp.mkv ! matroskademux name=demux ^
                  demux.video_0 ! h265parse ! queue ! mux. ^
                  demux.audio_0 ! opusparse ! queue ! mux. ^
                  matroskamux name=mux ! filesink location=fixed.mkv
 
 
-
+//screen with speakers and microphone audio (record video converence)				 
+gst-launch-1.0 -e audiomixer name=mixer matroskamux name=mux ^
+d3d11screencapturesrc ! videoconvert ! mfh265enc !  queue ! h265parse ! mux. ^
+wasapisrc loopback=true ! audioconvert ! audioresample ! queue ! mixer. ^
+wasapisrc ! audioconvert ! audioresample ! queue ! mixer. ^
+mixer. ! opusenc ! mux. ^
+mux. ! filesink location=capture.mkv
 
